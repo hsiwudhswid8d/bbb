@@ -15,27 +15,26 @@ import config
 from strings import get_command
 from AlexaMusic import app
 from AlexaMusic.misc import SUDOERS
-from AlexaMusic.utils.database import autoend_off, autoend_on
+from AlexaMusic.utils.database import add_off, add_on
 from AlexaMusic.utils.decorators.language import language
 
 # Commands
-AUTOEND_COMMAND = get_command("AUTOEND_COMMAND")
+LOGGER_COMMAND = get_command("LOGGER_COMMAND")
 
 
-@app.on_message(filters.command(AUTOEND_COMMAND) & SUDOERS)
-async def auto_end_stream(client, message):
-    usage = "**الاستخدام:**\n\n/autoend [enable|disable]"
+@app.on_message(filters.command(LOGGER_COMMAND) & SUDOERS)
+@language
+async def logger(client, message, _):
+    usage = _["log_1"]
     if len(message.command) != 2:
         return await message.reply_text(usage)
     state = message.text.split(None, 1)[1].strip()
     state = state.lower()
     if state == "enable":
-        await autoend_on()
-        await message.reply_text(
-            "تم تفعيل انهاء البث التلقائي.\n\nسيغادر المساعد محادثة الفيديو تلقائيًا بعد بضع دقائق عندما لا يكون احد يستمع  مع رسالة تحذيرية."
-        )
+        await add_on(config.LOG)
+        await message.reply_text(_["log_2"])
     elif state == "disable":
-        await autoend_off()
-        await message.reply_text("تم تعطيل إنهاء البث التلقائي.")
+        await add_off(config.LOG)
+        await message.reply_text(_["log_3"])
     else:
         await message.reply_text(usage)
